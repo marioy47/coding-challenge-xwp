@@ -119,12 +119,7 @@ class Block {
 				<?php // translators: The number of posts found. ?>
 				<h2><?php printf( _n( 'Any %d post with the tag of foo and the category of baz', 'Any %d posts with the tag of foo and the category of baz', count( $query->posts ), 'site-counts' ), count( $query->posts ) ); ?></h2>
 				<ul>
-					<?php
-					foreach ( $query->posts as $post ) :
-						if ( $post->ID === $current_post_id ) {
-							continue;
-						}
-						?>
+					<?php foreach ( $query->posts as $post ) : ?>
 						<li><?php echo $post->post_title; ?></li>
 					<?php endforeach; ?>
 				</ul>
