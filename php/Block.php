@@ -63,64 +63,68 @@ class Block {
 	 * @return string The markup of the block.
 	 */
 	public function render_callback( $attributes, $content, $block ) {
-		$post_types = get_post_types(  [ 'public' => true ] );
-		$class_name = $attributes['className'];
+		$post_types = get_post_types( [ 'public' => true ] );
+		$class_name = empty( $attributes['className'] ) ? '' : $attributes['className'];
 		ob_start();
 
 		?>
-        <div class="<?php echo $class_name; ?>">
+		<div class="<?php echo $class_name; ?>">
 			<h2>Post Counts</h2>
 			<ul>
 			<?php
-			foreach ( $post_types as $post_type_slug ) :
-                $post_type_object = get_post_type_object( $post_type_slug  );
-                $post_count = count(
-                    get_posts(
+			foreach ( $post_types as$post_type_slug ) :
+				$post_type_object = get_post_type_object( $post_type_slug );
+				$post_count       = count(
+					get_posts(
 						[
-							'post_type' => $post_type_slug,
+							'post_type'      => $post_type_slug,
 							'posts_per_page' => -1,
 						]
 					)
-                );
+				);
 
 				?>
-				<li><?php echo 'There are ' . $post_count . ' ' .
-					  $post_type_object->labels->name . '.'; ?></li>
-			<?php endforeach;	?>
-			</ul><p><?php echo 'The current post ID is ' . $_GET['post_id'] . '.'; ?></p>
+				<li>
+					<?php // translators: The number of posts and the type of posts. ?>
+					<?php printf( __( 'There are %1$s %2$s', 'site-counts' ), esc_attr( $post_count ), esc_html( $post_type_object->labels->name ) ); ?>
+				</li>
+				<?php
+				endforeach;
+			?>
+			</ul>
+
+			<p><?php echo 'The current post ID is ' . get_the_ID() . '.'; ?></p>
 
 			<?php
-			$query = new WP_Query(  array(
-				'post_type' => ['post', 'page'],
-				'post_status' => 'any',
-				'date_query' => array(
-					array(
-						'hour'      => 9,
-						'compare'   => '>=',
-					),
-					array(
-						'hour' => 17,
-						'compare'=> '<=',
-					),
-				),
-                'tag'  => 'foo',
-                'category_name'  => 'baz',
-				  'post__not_in' => [ get_the_ID() ],
-				  'meta_value' => 'Accepted',
-			));
-
-			if ( $query->found_posts ) :
-				?>
-				 <h2>Any 5 posts with the tag of foo and the category of baz</h2>
-                <ul>
-                <?php
-
-                 foreach ( array_slice( $query->posts, 0, 5 ) as $post ) :
-                    ?><li><?php echo $post->post_title ?></li><?php
-				endforeach;
-			endif;
-		 	?>
+			$query = new WP_Query(
+				[
+					'post_type'     => [ 'post', 'page' ],
+					'post_status'   => 'any',
+					'date_query'    => [
+						[
+							'hour'    => 9,
+							'compare' => '>=',
+						],
+						[
+							'hour'    => 17,
+							'compare' => '<=',
+						],
+					],
+					'tag'           => 'foo',
+					'category_name' => 'baz',
+					'post__not_in'  => [ get_the_ID() ],
+					// 'meta_value'    => 'Accepted',
+				]
+			);
+			?>
+			<?php if ( $query->found_posts ) : ?>
+			<h2>Any 5 posts with the tag of foo and the category of baz</h2>
+			<ul>
+				<?php foreach ( array_slice( $query->posts, 0, 5 ) as $post ) : ?>
+					<li><?php echo $post->post_title; ?></li>
+				<?php endforeach; ?>
 			</ul>
+			<?php endif; ?>
 		</div>
 		<?php
 
