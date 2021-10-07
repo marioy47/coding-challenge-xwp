@@ -1,0 +1,46 @@
+# docker-compose.yml
+version: '3'
+
+services:
+
+  # MariaDB
+  db:
+    image: mariadb
+    restart: unless-stopped
+    container_name: xwp-challange-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db-data:/var/lib/mysql
+
+  # Wordpress
+  wp:
+    image: wordpress
+    restart: unless-stopped
+    container_name: xwp-challange-wp
+    environment:
+      WORDPRESS_DB_HOST: xwp-challange-db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./:/var/www/html/wp-content/plugins/xwp-challange
+    ports:
+      - 8081:80
+    depends_on:
+      - db
+
+# Make network name pretty
+networks:
+  default:
+    name: xwp-challange-network
+
+# Persist DB and WordPress data across containers
+volumes:
+  db-data:
+
